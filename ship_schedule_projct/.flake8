@@ -1,0 +1,33 @@
+[flake8]
+# 代码质量检查配置
+
+# 最大行长度
+max-line-length = 88
+
+# 忽略的错误代码
+ignore = 
+    E203,  # whitespace before ':'
+    E501,  # line too long (handled by black)
+    W503,  # line break before binary operator
+    F401,  # imported but unused (handled by isort)
+
+# 排除的文件和目录
+exclude = 
+    .git,
+    __pycache__,
+    .venv,
+    venv,
+    migrations,
+    node_modules,
+    .pytest_cache,
+    htmlcov,
+    build,
+    dist,
+    *.egg-info
+
+# 每个文件的最大复杂度
+max-complexity = 10
+
+# 导入顺序检查
+import-order-style = google
+application-import-names = ship_schedule,authentication,schedules,local_fees

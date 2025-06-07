@@ -1,0 +1,90 @@
+services:
+  # 数据库服务 - 使用国内镜像源
+  db:
+    image: registry.cn-hangzhou.aliyuncs.com/library/mysql:8.0
+    container_name: ship_schedule_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: huan_hai
+      MYSQL_ROOT_PASSWORD: "099118"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "3307:3306"  # 避免与本地MySQL冲突
+    networks:
+      - ship_network
+    command: --default-authentication-plugin=mysql_native_password
+
+  # Redis缓存服务 - 使用国内镜像源
+  redis:
+    image: registry.cn-hangzhou.aliyuncs.com/library/redis:7-alpine
+    container_name: ship_schedule_redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6380:6379"  # 避免与本地Redis冲突
+    networks:
+      - ship_network
+
+  # 后端Web应用 - 使用现有.env配置
+  web:
+    build: 
+      context: ./ship_schedule_projct
+      dockerfile: Dockerfile
+    container_name: ship_schedule_web
+    restart: unless-stopped
+    environment:
+      - DEBUG=True
+      - DB_HOST=db
+      - DB_NAME=huan_hai
+      - DB_USER=root
+      - DB_PASSWORD=099118
+      - DB_PORT=3306
+      - REDIS_URL=redis://redis:6379/0
+      - ALLOWED_HOSTS=localhost,127.0.0.1,testserver
+      - SECRET_KEY=s#ix@1_%s7li7bw^(ymq+@-cnijhk0i1d-su=qvl=n5*-!)-_o
+    volumes:
+      - ./ship_schedule_projct/media:/app/media
+      - ./ship_schedule_projct/logs:/app/logs
+      - ./ship_schedule_projct/static:/app/static
+      - ./ship_schedule_projct/.env:/app/.env  # 挂载现有.env文件
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    networks:
+      - ship_network
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             python manage.py shell -c \"
+             from django.contrib.auth import get_user_model;
+             User = get_user_model();
+             User.objects.filter(username='admin').exists() or User.objects.create_superuser('admin', 'admin@example.com', 'admin123')
+             \" &&
+             gunicorn --bind 0.0.0.0:8000 --workers 3 ship_schedule.wsgi:application"
+
+  # 前端应用
+  frontend:
+    build:
+      context: ./ship-schedule-management-ui
+      dockerfile: Dockerfile
+    container_name: ship_schedule_frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - web
+    networks:
+      - ship_network
+
+volumes:
+  mysql_data:
+  redis_data:
+
+networks:
+  ship_network:
+    driver: bridge

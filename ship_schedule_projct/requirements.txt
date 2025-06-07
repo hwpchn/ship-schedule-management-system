@@ -1,0 +1,50 @@
+# 🚢 船舶航线管理系统 - 核心依赖包
+
+# Python 基础包
+setuptools>=65.0.0
+wheel
+
+# Django 核心框架
+Django==4.2.7
+djangorestframework==3.14.0
+
+# JWT 认证
+djangorestframework-simplejwt==5.3.0
+
+# 数据库驱动
+mysqlclient==2.2.0
+
+# 跨域支持
+django-cors-headers==4.3.1
+
+# 过滤和分页
+django-filter==23.3
+
+# 环境变量管理
+python-decouple==3.8
+python-dotenv==1.0.0
+
+# 图像处理 (用户头像)
+Pillow==10.1.0
+
+# 时间处理
+pytz==2023.3
+
+# HTTP 请求
+requests==2.31.0
+
+# 数据验证
+jsonschema==4.19.2
+
+# 缓存支持 (可选)
+redis==5.0.1
+django-redis==5.4.0
+
+# 生产环境服务器
+gunicorn==21.2.0
+
+# 监控和日志
+sentry-sdk==1.38.0
+
+# 开发工具依赖 (可选安装)
+# pip install -r requirements-dev.txt

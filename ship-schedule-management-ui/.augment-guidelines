@@ -1,0 +1,11 @@
+# Augment Code Guidelines - Claude Sonnet 4 Required
+
+## Model Requirements
+- **MANDATORY**: Use Claude Sonnet 4 model exclusively
+- **FORBIDDEN**: Claude Sonnet 3.5, Claude Sonnet 3.7, or any other models
+- **Verification**: Each response must start with model declaration
+
+## Response Format
+- Start every response with: "[MODEL: Claude Sonnet 4]"
+- If not using Claude Sonnet 4, immediately switch to Claude Sonnet 4
+- Follow RIPER-5 protocol with mode declarations: [MODE: RESEARCH/INNOVATE/PLAN/EXECUTE/REVIEW]

@@ -1,0 +1,92 @@
+# Generated manually for local fee models
+
+from django.db import migrations, models
+import django.db.models.deletion
+
+
+class Migration(migrations.Migration):
+
+    dependencies = [
+        ('schedules', '0002_vesselinfofromcompany'),  # 依赖于现有的迁移
+    ]
+
+    operations = [
+        migrations.CreateModel(
+            name='Currency',
+            fields=[
+                ('code', models.CharField(max_length=3, primary_key=True, serialize=False, verbose_name='货币代码')),
+                ('name', models.CharField(max_length=50, verbose_name='货币名称')),
+                ('symbol', models.CharField(max_length=5, verbose_name='货币符号')),
+            ],
+            options={
+                'verbose_name': '货币',
+                'verbose_name_plural': '货币',
+                'db_table': 'currency',
+            },
+        ),
+        migrations.CreateModel(
+            name='Unit',
+            fields=[
+                ('id', models.AutoField(primary_key=True, serialize=False, verbose_name='ID')),
+                ('code', models.CharField(max_length=20, unique=True, verbose_name='单位代码')),
+                ('name', models.CharField(max_length=50, verbose_name='单位名称')),
+                ('description', models.TextField(blank=True, null=True, verbose_name='描述')),
+            ],
+            options={
+                'verbose_name': '单位',
+                'verbose_name_plural': '单位',
+                'db_table': 'unit',
+            },
+        ),
+        migrations.CreateModel(
+            name='FeeType',
+            fields=[
+                ('id', models.AutoField(primary_key=True, serialize=False, verbose_name='ID')),
+                ('code', models.CharField(max_length=20, unique=True, verbose_name='费用代码')),
+                ('name', models.CharField(max_length=100, verbose_name='费用名称')),
+                ('description', models.TextField(blank=True, null=True, verbose_name='描述')),
+                ('is_required', models.BooleanField(default=False, verbose_name='是否必填')),
+            ],
+            options={
+                'verbose_name': '费用类型',
+                'verbose_name_plural': '费用类型',
+                'db_table': 'fee_type',
+            },
+        ),
+        migrations.CreateModel(
+            name='Ship',
+            fields=[
+                ('id', models.AutoField(primary_key=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(max_length=100, verbose_name='船名')),
+            ],
+            options={
+                'verbose_name': '船舶',
+                'verbose_name_plural': '船舶',
+                'db_table': 'ship',
+            },
+        ),
+        migrations.CreateModel(
+            name='ShipFee',
+            fields=[
+                ('id', models.AutoField(primary_key=True, serialize=False, verbose_name='ID')),
+                ('pol', models.CharField(max_length=10, verbose_name='起运港五字码')),
+                ('pod', models.CharField(blank=True, max_length=10, null=True, verbose_name='目的港五字码')),
+                ('price_20gp', models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True, verbose_name='20GP价格')),
+                ('price_40gp', models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True, verbose_name='40GP价格')),
+                ('price_40hq', models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True, verbose_name='40HQ价格')),
+                ('price_per_bill', models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True, verbose_name='单票价格')),
+                ('remarks', models.TextField(blank=True, null=True, verbose_name='备注')),
+                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='创建时间')),
+                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='更新时间')),
+                ('currency', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='schedules.currency', verbose_name='货币')),
+                ('fee_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='schedules.feetype', verbose_name='费用类型')),
+                ('ship', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='schedules.ship', verbose_name='船舶')),
+                ('unit', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='schedules.unit', verbose_name='计量单位')),
+            ],
+            options={
+                'verbose_name': '船舶费用',
+                'verbose_name_plural': '船舶费用',
+                'db_table': 'ship_fee',
+            },
+        ),
+    ]

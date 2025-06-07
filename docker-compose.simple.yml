@@ -1,0 +1,47 @@
+services:
+  # 仅后端Web应用 - 连接本地数据库
+  web:
+    build: 
+      context: ./ship_schedule_projct
+      dockerfile: Dockerfile
+    container_name: ship_schedule_web
+    restart: unless-stopped
+    environment:
+      - DEBUG=True
+      - DB_HOST=host.docker.internal  # 连接宿主机的MySQL
+      - DB_NAME=huan_hai
+      - DB_USER=root
+      - DB_PASSWORD=099118
+      - DB_PORT=3306
+      - ALLOWED_HOSTS=localhost,127.0.0.1,testserver
+      - SECRET_KEY=s#ix@1_%s7li7bw^(ymq+@-cnijhk0i1d-su=qvl=n5*-!)-_o
+    volumes:
+      - ./ship_schedule_projct/media:/app/media
+      - ./ship_schedule_projct/logs:/app/logs
+      - ./ship_schedule_projct/static:/app/static
+      - ./ship_schedule_projct/.env:/app/.env
+    ports:
+      - "8000:8000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             python manage.py shell -c \"
+             from django.contrib.auth import get_user_model;
+             User = get_user_model();
+             User.objects.filter(username='admin').exists() or User.objects.create_superuser('admin', 'admin@example.com', 'admin123')
+             \" &&
+             python manage.py runserver 0.0.0.0:8000"
+
+  # 前端应用
+  frontend:
+    build:
+      context: ./ship-schedule-management-ui
+      dockerfile: Dockerfile
+    container_name: ship_schedule_frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - web

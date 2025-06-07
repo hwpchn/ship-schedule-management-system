@@ -1,0 +1,85 @@
+# 🚢 船舶航线管理系统 - Docker Compose配置
+
+version: '3.8'
+
+services:
+  # 数据库服务
+  db:
+    image: mysql:8.0
+    container_name: ship_schedule_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: huan_hai
+      MYSQL_USER: ship_user
+      MYSQL_PASSWORD: ship_password
+      MYSQL_ROOT_PASSWORD: 099118
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./scripts/sql:/docker-entrypoint-initdb.d
+    ports:
+      - "3306:3306"
+    networks:
+      - ship_network
+
+  # Redis缓存服务
+  redis:
+    image: redis:7-alpine
+    container_name: ship_schedule_redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - ship_network
+
+  # Web应用服务
+  web:
+    build: .
+    container_name: ship_schedule_web
+    restart: unless-stopped
+    environment:
+      - DEBUG=False
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASSWORD=099118
+      - REDIS_URL=redis://redis:6379/0
+    volumes:
+      - ./media:/app/media
+      - ./logs:/app/logs
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    networks:
+      - ship_network
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             gunicorn --bind 0.0.0.0:8000 --workers 3 ship_schedule.wsgi:application"
+
+  # Nginx反向代理
+  nginx:
+    image: nginx:alpine
+    container_name: ship_schedule_nginx
+    restart: unless-stopped
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./media:/app/media
+      - ./static:/app/static
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - web
+    networks:
+      - ship_network
+
+volumes:
+  mysql_data:
+  redis_data:
+
+networks:
+  ship_network:
+    driver: bridge

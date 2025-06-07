@@ -1,0 +1,16 @@
+{
+  "token": "9ee2ea1d-1739-47ef-8d42-02e52a13c233",
+  "company_id": "100091",
+  "days_back": 2,
+  "pol_cd": "CNSHK",
+  "pod_cd": "THBKK",
+  "weeks_out": "6",
+  "is_transit": "0",
+  "db_host": "db",
+  "db_port": 3306,
+  "db_user": "root",
+  "db_password": "099118",
+  "db_name": "huan_hai",
+  "db_charset": "utf8mb4",
+  "comment": "容器内部配置 - 如果爬虫也在Docker容器中运行"
+}

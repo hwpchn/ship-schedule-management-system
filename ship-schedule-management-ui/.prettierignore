@@ -1,0 +1,12 @@
+dist
+dist-ssr
+*.local
+node_modules
+coverage
+*.md
+*.json
+*.yml
+*.yaml
+pnpm-lock.yaml
+auto-imports.d.ts
+components.d.ts
