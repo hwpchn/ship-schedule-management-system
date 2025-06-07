@@ -1,12 +1,14 @@
 services:
-  # 数据库服务 - 使用国内镜像源
+  # 数据库服务 - 使用多个国内镜像源备选
   db:
-    image: registry.cn-hangzhou.aliyuncs.com/library/mysql:8.0
+    image: mysql:8.0
     container_name: ship_schedule_db
     restart: unless-stopped
     environment:
       MYSQL_DATABASE: huan_hai
       MYSQL_ROOT_PASSWORD: "099118"
+      MYSQL_CHARSET: utf8mb4
+      MYSQL_COLLATION: utf8mb4_unicode_ci
     volumes:
       - mysql_data:/var/lib/mysql
       - ./init-db.sql:/docker-entrypoint-initdb.d/init.sql
@@ -14,11 +16,15 @@ services:
       - "3307:3306"  # 避免与本地MySQL冲突
     networks:
       - ship_network
-    command: --default-authentication-plugin=mysql_native_password
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
 
-  # Redis缓存服务 - 使用国内镜像源
+  # Redis缓存服务 - 使用官方镜像通过国内源下载
   redis:
-    image: registry.cn-hangzhou.aliyuncs.com/library/redis:7-alpine
+    image: redis:7-alpine
     container_name: ship_schedule_redis
     restart: unless-stopped
     volumes:
@@ -27,6 +33,11 @@ services:
       - "6380:6379"  # 避免与本地Redis冲突
     networks:
       - ship_network
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      timeout: 10s
+      retries: 5
 
   # 后端Web应用 - 使用现有.env配置
   web:
